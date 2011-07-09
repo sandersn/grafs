@@ -30,6 +30,7 @@ type Dfs<'k> = {
   discover : int
   finish : int
   parent : option<'k>
+  cConnected : int
 }
 module Dictionary =
   let fromList pairs = 
@@ -59,30 +60,41 @@ let bfs (g : Graph<'k,unit>) (start : 'k) : Graph<'k,Bfs<'k>> =
     g'.[u].meta <- { m with colour = Black }
     loop (queue @ vs)
   loop [start]
-let dfs (g : Graph<'k,unit>) : Graph<'k,Dfs<'k>> =
+
+let dfsWith (g : Graph<'k,unit>) action : Graph<'k,Dfs<'k>> =
   let g' = Dictionary (Seq.length g)
   for pair in g do
-    g'.[pair.Key] <- {edges=pair.Value.edges; meta={colour=White; discover=0; finish=0; parent=None}}
+    g'.[pair.Key] <- {edges=pair.Value.edges; meta={colour=White; discover=0; finish=0; parent=None; cConnected= -1}}
   let time = ref 0
-  let rec dfsVisit (u : 'k) =
+  let rec dfsVisit (u : 'k) k =
     let value = g'.[u]
     time := !time + 1
-    value.meta <- {value.meta with colour=Grey; discover=time.Value}
+    value.meta <- {value.meta with colour=Grey; discover=time.Value; cConnected=k}
     for v in value.edges |> Seq.filter (fun v -> g'.[v].meta.colour = White) do
       g'.[v].meta <- { g'.[v].meta with parent=Some u }
-      dfsVisit v
+      dfsVisit v k
     time := !time + 1
     value.meta <- {value.meta with colour=Black; finish=time.Value}
-  seq { for pair in g' do 
-          if pair.Value.meta.colour = White then 
-            yield pair.Key } |> Seq.iter dfsVisit
+    action u
+  let mutable cConnected = 0
+  for pair in g' do 
+    if pair.Value.meta.colour = White then 
+      dfsVisit pair.Key cConnected
+      cConnected <- cConnected + 1
   g'
-let g = 
-    Dictionary.fromList [
-      vertex 1 [2; 3; 4]
-      vertex 2 [1]
-      vertex 3 [3;4]
-      vertex 4 []
-      vertex 5 [4]
-    ]
-Seq.iter (printfn "%A") (reverse g)
+let dfs (g : Graph<'k,unit>) : Graph<'k,Dfs<'k>> =
+  dfsWith g ignore
+
+let state v =
+  let r = ref v
+  let get () = r.Value
+  let put v = r.Value <- v
+  let update f = r.Value <- f r.Value
+  get,put,update
+let cons x l = x :: l
+let topologicalSort (g : Graph<'k,unit>) =
+  let get,_,update = state []
+  dfsWith g (cons >> update) |> ignore
+  get ()
+
+printfn "This program is not intended for running. I created the wrong type of project."
