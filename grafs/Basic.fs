@@ -38,10 +38,13 @@ module Dictionary =
     for k,v in pairs do
       d.[k] <- v
     d
-let reverse (g : Graph<'a,'b>) : Graph<'a,unit> =
+let annotate (g: Graph<'k,unit>) (meta : 'v) : Graph<'k,'v> =
   let g' = Dictionary (Seq.length g)
   for k in g.Keys do
-    g'.[k] <- {meta=(); edges=ResizeArray ()}
+    g'.[k] <- {meta=meta; edges=ResizeArray ()}
+  g'
+let reverse (g : Graph<'a,'b>) : Graph<'a,unit> =
+  let g' = annotate g ()
   for pair in g do
     for k' in pair.Value.edges do
       g'.[k'].edges.Add pair.Key
@@ -61,6 +64,7 @@ let bfs (g : Graph<'k,unit>) (start : 'k) : Graph<'k,Bfs<'k>> =
     loop (queue @ vs)
   loop [start]
 
+let incf iref = iref := !iref + 1
 let dfsWith (g : Graph<'k,unit>) action : Graph<'k,Dfs<'k>> =
   let g' = Dictionary (Seq.length g)
   for pair in g do
@@ -69,6 +73,7 @@ let dfsWith (g : Graph<'k,unit>) action : Graph<'k,Dfs<'k>> =
   let rec dfsVisit (u : 'k) k =
     let value = g'.[u]
     time := !time + 1
+    incf time
     value.meta <- {value.meta with colour=Grey; discover=time.Value; cConnected=k}
     for v in value.edges |> Seq.filter (fun v -> g'.[v].meta.colour = White) do
       g'.[v].meta <- { g'.[v].meta with parent=Some u }
@@ -82,9 +87,12 @@ let dfsWith (g : Graph<'k,unit>) action : Graph<'k,Dfs<'k>> =
       dfsVisit pair.Key cConnected
       cConnected <- cConnected + 1
   g'
-let dfs (g : Graph<'k,unit>) : Graph<'k,Dfs<'k>> =
-  dfsWith g ignore
+let dfs (g : Graph<'k,unit>) : Graph<'k,Dfs<'k>> = dfsWith g ignore
 
+(*let stronglyConnectedComponents (g : Graph<'k,Dfs<'k>>) : Graph<'k,Dfs<'k>> =
+  let g' = reverse g
+  g
+*)
 let state v =
   let r = ref v
   let get () = r.Value
@@ -92,6 +100,7 @@ let state v =
   let update f = r.Value <- f r.Value
   get,put,update
 let cons x l = x :: l
+
 let topologicalSort (g : Graph<'k,unit>) =
   let get,_,update = state []
   dfsWith g (cons >> update) |> ignore
