@@ -38,21 +38,21 @@ module Dictionary =
     for k,v in pairs do
       d.[k] <- v
     d
-let annotate (g: Graph<'k,unit>) (meta : 'v) : Graph<'k,'v> =
+let annotate (g: Graph<'k,'a>) (meta : 'b) : Graph<'k,'b> =
   let g' = Dictionary (Seq.length g)
-  for k in g.Keys do
-    g'.[k] <- {meta=meta; edges=ResizeArray ()}
+  for pair in g do
+    g'.[pair.Key] <- {meta=meta; edges=pair.Value.edges }
   g'
 let reverse (g : Graph<'a,'b>) : Graph<'a,unit> =
-  let g' = annotate g ()
+  let g' = Dictionary (Seq.length g)
+  for pair in g do
+    g'.[pair.Key] <- {meta=(); edges=ResizeArray () }
   for pair in g do
     for k' in pair.Value.edges do
       g'.[k'].edges.Add pair.Key
   g'
 let bfs (g : Graph<'k,unit>) (start : 'k) : Graph<'k,Bfs<'k>> =
-  let g' = Dictionary (Seq.length g)
-  for pair in g do
-    g'.[pair.Key] <- {edges=pair.Value.edges; meta={colour=White; depth=Int32.MaxValue; parent=None}}
+  let g' = annotate g {colour=White; depth=Int32.MaxValue; parent=None}
   g'.[start].meta <- {colour=Grey; depth=0; parent=None}
   let rec loop : (list<'k> -> Graph<'k,Bfs<'k>>) = function
   | [] -> g'
@@ -64,16 +64,12 @@ let bfs (g : Graph<'k,unit>) (start : 'k) : Graph<'k,Bfs<'k>> =
     loop (queue @ vs)
   loop [start]
 
-let incf iref = iref := !iref + 1
 let dfsWith (g : Graph<'k,unit>) action : Graph<'k,Dfs<'k>> =
-  let g' = Dictionary (Seq.length g)
-  for pair in g do
-    g'.[pair.Key] <- {edges=pair.Value.edges; meta={colour=White; discover=0; finish=0; parent=None; cConnected= -1}}
+  let g' = annotate g {colour=White; discover=0; finish=0; parent=None; cConnected= -1}
   let time = ref 0
   let rec dfsVisit (u : 'k) k =
     let value = g'.[u]
     time := !time + 1
-    incf time
     value.meta <- {value.meta with colour=Grey; discover=time.Value; cConnected=k}
     for v in value.edges |> Seq.filter (fun v -> g'.[v].meta.colour = White) do
       g'.[v].meta <- { g'.[v].meta with parent=Some u }
