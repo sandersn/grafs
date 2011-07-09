@@ -66,5 +66,15 @@ type public Tester() =
         vertex 'y' ['x']
         vertex 'z' ['z']
       ]
-    let g' = Basic.dfs g
-    ()
+    let sorted = Basic.dfs g
+    let check node parent discover finish =
+      Assert.That (sorted.[node].meta.discover, Is.EqualTo discover)
+      Assert.That (sorted.[node].meta.finish, Is.EqualTo finish)
+      Assert.That (sorted.[node].meta.colour, Is.EqualTo Black)
+      Assert.That (sorted.[node].meta.parent, Is.EqualTo parent)
+    check 'u' None 1 8
+    check 'v' (Some 'u') 2 7
+    check 'w' None 9 12
+    check 'x' (Some 'y') 4 5
+    check 'y' (Some 'v') 3 6
+    check 'z' (Some 'w') 10 11
