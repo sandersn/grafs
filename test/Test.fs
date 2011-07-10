@@ -95,3 +95,18 @@ type public Tester() =
       ]
     Assert.That (Basic.topologicalSort g,
                  Is.EqualTo ["socks"; "boxers"; "pants"; "shoes"; "watch"; "shirt"; "belt"; "tie"; "jacket"])
+  [<Test>]
+  member this.StronglyConnectedComponentsAreCorrect () =
+    let g =
+      Dictionary.fromList [
+        vertex 'c' ['g'; 'd']
+        vertex 'g' ['f'; 'h']
+        vertex 'f' ['g']
+        vertex 'h' ['h']
+        vertex 'd' ['c']
+        vertex 'b' ['c'; 'f'; 'e']
+        vertex 'e' ['f'; 'a']
+        vertex 'a' ['b']
+      ]
+    Assert.That (Basic.stronglyConnectedComponents g,
+                 Is.EqualTo (set [set ['a'; 'b'; 'e']; set ['c'; 'd']; set ['f'; 'g']; set ['h']]))

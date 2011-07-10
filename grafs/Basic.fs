@@ -85,21 +85,37 @@ let dfsWith (g : Graph<'k,unit>) action : Graph<'k,Dfs<'k>> =
   g'
 let dfs (g : Graph<'k,unit>) : Graph<'k,Dfs<'k>> = dfsWith g ignore
 
-(*let stronglyConnectedComponents (g : Graph<'k,Dfs<'k>>) : Graph<'k,Dfs<'k>> =
-  let g' = reverse g
-  g
-*)
-let state v =
-  let r = ref v
-  let get () = r.Value
-  let put v = r.Value <- v
-  let update f = r.Value <- f r.Value
-  get,put,update
 let cons x l = x :: l
+let update (r : ref<'a>) f = r.Value <- f r.Value
+module State =
+  let run action v =
+    let state = ref v
+    action state
+    state.Value
 
 let topologicalSort (g : Graph<'k,unit>) =
-  let get,_,update = state []
-  dfsWith g (cons >> update) |> ignore
-  get ()
+  State.run (fun t -> dfsWith g (cons >> update t) |> ignore) []
+
+let stronglyConnectedComponents (g : Graph<'k,unit>) : Set<Set<'k>> =
+  let forwardG = dfs g
+  let g' = annotate (reverse g) {colour=White; discover=0; finish=0; parent=None; cConnected= -1}
+  let time = ref 0
+  let rec dfsVisit (u : 'k) k =
+    let value = g'.[u]
+    time := !time + 1
+    value.meta <- {value.meta with colour=Grey; discover=time.Value; cConnected=k}
+    for v in value.edges |> Seq.filter (fun v -> g'.[v].meta.colour = White) do
+      g'.[v].meta <- { g'.[v].meta with parent=Some u }
+      dfsVisit v k
+    time := !time + 1
+    value.meta <- {value.meta with colour=Black; finish=time.Value}
+  let mutable cConnected = 0
+  for pair in g' |> Seq.sortBy (fun pair -> -forwardG.[pair.Key].meta.finish) do 
+    if pair.Value.meta.colour = White then 
+      dfsVisit pair.Key cConnected
+      cConnected <- cConnected + 1
+  set (g' |> Seq.groupBy (fun pair -> pair.Value.meta.cConnected) 
+          |> Seq.map (snd >> Seq.map (fun pair -> pair.Key) >> set))
+
 
 printfn "This program is not intended for running. I created the wrong type of project."
