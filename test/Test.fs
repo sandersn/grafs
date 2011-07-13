@@ -1,6 +1,7 @@
 ﻿module Test
 open NUnit.Framework
 open System.Collections.Generic
+open Types
 open Basic
 
 [<TestFixture>]

@@ -1,37 +1,8 @@
 ﻿module Basic
 open System
 open System.Collections.Generic
+open Types
 
-[<CustomEquality;NoComparison>]
-type Vertex<'k,'a when 'k : equality> = {
-  mutable meta : 'a
-  edges : ResizeArray<'k>
-} with
-  override this.ToString () = sprintf "%A\t%A" this.meta this.edges
-  override this.Equals that =
-    match that with
-    | null -> false
-    | :? Vertex<'k,'a> as that ->
-      this.edges.Count = that.edges.Count 
-      && Seq.forall2 (fun x y -> x = y) this.edges that.edges
-    | _ -> false
-  override this.GetHashCode () = 17 ^^^ hash this.edges
-type Graph<'k,'a when 'k : equality> = Dictionary<'k, Vertex<'k,'a>>
-let vertex v (es : seq<'a>)  = (v,{meta=(); edges=ResizeArray<'a> es})
-
-type Colour  = White | Grey | Black
-type Bfs<'k> = {
-  colour : Colour
-  depth : int
-  parent : option<'k>
-}
-type Dfs<'k> = {
-  colour : Colour
-  discover : int
-  finish : int
-  parent : option<'k>
-  cConnected : int
-}
 module Dictionary =
   let fromList pairs = 
     let d = Dictionary (Seq.length pairs)
