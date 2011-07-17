@@ -3,6 +3,7 @@ open NUnit.Framework
 open System.Collections.Generic
 open Types
 open Basic
+open Util
 
 [<TestFixture>]
 type public Tester() =
@@ -24,7 +25,16 @@ type public Tester() =
     ]
   [<Test>]
   member this.VertexSupportsEquality () =
-    Assert.That ({meta=(); edges=ResizeArray [1;2;3]}, Is.EqualTo {meta=(); edges=ResizeArray [1;2;3]})
+    Assert.That ({meta=(); edges=ResizeArray [{edge=1;meta=()}
+                                              {edge=2;meta=()}
+                                              {edge=3;meta=()}]}, 
+                 Is.EqualTo {meta=(); edges=ResizeArray [{edge=1;meta=()}
+                                                         {edge=2;meta=()}
+                                                         {edge=3;meta=()}]})
+  [<Test>]
+  member this.VertexEqualityIgnoresMetadata () =
+    Assert.That ({meta=1; edges=ResizeArray [{edge=1;meta=()};{edge=2;meta=()}]},
+                 Is.EqualTo {meta=2; edges=ResizeArray [{edge=1;meta=()};{edge=2;meta=()}]})
   [<Test>]
   member this.ReverseEmptyGraphIsEmptyGraph () =
     Assert.That (Basic.reverse (Dictionary ()),Is.EqualTo (Dictionary ()))

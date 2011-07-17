@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Test.fs" />
     <None Include="Script.fsx" />
+    <Compile Include="SpanTest.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\grafs\grafs.fsproj">
