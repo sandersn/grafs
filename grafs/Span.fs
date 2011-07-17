@@ -2,18 +2,19 @@
 open Types
 open Util
 
-let min (g : Graph<'k,unit,int>) =
+let minKruskal (g : Graph<'k,unit,int>) =
   let mutable a = set []
   let forest = g.Keys |> Seq.map (fun v -> v, set [v]) |> Dictionary.fromList
   
-  let edgePairs (k,{edges=edges}) =
-    let undirected {edge=e; meta=w} =
-      if e > k
-      then (w,(k,e))
-      else (w,(e,k))
+  let edgePairs (src,{edges=edges}) =
+    let undirected {edge=dst; meta=w} =
+      if dst > src
+      then (w,(src,dst))
+      else (w,(dst,src))
     edges |> Seq.map undirected
-  let edges = g |> Seq.map (Dictionary.item >> edgePairs) |> Seq.concat |> set |> Seq.sortBy fst |> Seq.map snd
-  // TODO: Find a set in ks containg the arg
+  let edges = g |> Seq.map (Dictionary.item >> edgePairs) 
+                |> Seq.concat |> set 
+                |> Seq.sortBy fst |> Seq.map snd
   let findSet x = forest |> Seq.find (fun pair -> pair.Value.Contains x) |> Dictionary.Key
   let union (dTree,sTree) = 
     forest.[dTree] <- Set.union forest.[dTree] forest.[sTree]

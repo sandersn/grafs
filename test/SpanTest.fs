@@ -21,14 +21,12 @@ type public SpanTester () =
         wvertex 'h' [('g',1);('i',7);('a',8)]
         wvertex 'i' [('c',2);('g',6);('h',7)]
       ]
-    // TODO: Fails because it's an undirected graph, so there are duplicates of everything
-    // should create a canonical order for edges, then eliminate duplicates somehow
-    Assert.That(Span.min g, Is.EqualTo (set ['a','b'
-                                             'a','h'
-                                             'c','d'
-                                             'c','f'
-                                             'c','i'
-                                             'd','e'
-                                             'f','g'
-                                             'g','h'
-                                            ]))
+    Assert.That(Span.minKruskal g, Is.EqualTo (set ['a','b'
+                                                    'a','h'
+                                                    'c','d'
+                                                    'c','f'
+                                                    'c','i'
+                                                    'd','e'
+                                                    'f','g'
+                                                    'g','h'
+                                                   ]))
