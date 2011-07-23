@@ -4,11 +4,6 @@ open System.Collections.Generic
 open Types
 open Util
 
-let annotate (g: Graph<'k,'a,unit>) (meta : 'b) : Graph<'k,'b,unit> =
-  let g' = Dictionary (Seq.length g)
-  for pair in g do
-    g'.[pair.Key] <- {meta=meta; edges=pair.Value.edges }
-  g'
 let reverse (g : Graph<'a,_,unit>) : Graph<'a,unit,unit> =
   let g' = Dictionary (Seq.length g)
   for pair in g do

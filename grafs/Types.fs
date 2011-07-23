@@ -29,12 +29,18 @@ type Vertex<'k,'a,'e when 'k : equality> = {
       && Seq.forall2 (=) this.edges that.edges
     | _ -> false
   override this.GetHashCode () = 17 ^^^ hash this.edges
+// graph proper //
 type Graph<'k,'v,'e when 'k : equality> = Dictionary<'k, Vertex<'k,'v,'e>>
+let annotate (g: Graph<'k,'a,unit>) (meta : 'b) : Graph<'k,'b,unit> =
+  let g' = Dictionary (Seq.length g)
+  for pair in g do
+    g'.[pair.Key] <- {meta=meta; edges=pair.Value.edges }
+  g'
 let vertex v (es : seq<'a>) =
   (v,{meta=(); edges=ResizeArray<Edge<'a,unit>> (es |> Seq.map (fun a -> {edge=a; meta=()}))})
 let wvertex v (es : seq<'a * int>) =
   (v,{meta=(); edges=ResizeArray<Edge<'a,int>> (es |> Seq.map (fun (a,b) -> {edge=a; meta=b}))})
-
+// metadata //
 type Colour  = White | Grey | Black
 type Bfs<'k> = {
   colour : Colour
@@ -48,4 +54,7 @@ type Dfs<'k> = {
   parent : option<'k>
   cConnected : int
 }
-
+type Prim<'k> = {
+  key : int
+  parent : option<'k>
+}
