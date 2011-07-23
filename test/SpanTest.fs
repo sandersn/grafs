@@ -45,7 +45,7 @@ type public SpanTester () =
         wvertex 'i' [('c',2);('g',6);('h',7)]
       ]
     Assert.That(Span.minPrim g 'a', Is.EqualTo (set ['a','b'
-                                                     'a','h'
+                                                     'b','c'
                                                      'c','d'
                                                      'c','f'
                                                      'c','i'

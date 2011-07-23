@@ -33,7 +33,7 @@ let minKruskal (g : Graph<'k,unit,int>) =
   })
 let minPrim (g : Graph<'k,unit,int>) (root : 'k) =
   let g' = Dictionary (Seq.length g)
-  for pair in g' do
+  for pair in g do
     g'.[pair.Key] <- {edges=pair.Value.edges; meta={key=System.Int32.MaxValue; parent=None}}
   g'.[root] <- {g'.[root] with meta={key=0; parent=None}}
   let q = ResizeArray g'.Keys
