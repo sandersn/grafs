@@ -3,6 +3,7 @@ open System.Collections.Generic
 open Types
 open Util
 open Util.TupleArrow
+open MinQueue
 
 type Forest<'k when 'k : comparison> (g : Graph<'k,unit,int>) =
   let forest = g.Keys |> Seq.map (fun v -> v, set [v]) |> Dictionary.fromList
@@ -36,10 +37,9 @@ let minPrim (g : Graph<'k,unit,int>) (root : 'k) =
   for pair in g do
     g'.[pair.Key] <- {edges=pair.Value.edges; meta={key=System.Int32.MaxValue; parent=None}}
   g'.[root] <- {g'.[root] with meta={key=0; parent=None}}
-  let q = ResizeArray g'.Keys
+  let q = MinQueue g'.Keys
   while q.Count > 0 do
-    let u = Seq.min q
-    q.Remove u |> ignore // we know it's there, we just found it
+    let u = q.ExtractMin ()
     for v in g'.[u].edges do // pretty sure you instead could do a filter, then a minBy
       if q.Contains v.edge && v.meta < g'.[v.edge].meta.key then
         g'.[v.edge] <- {g'.[v.edge] with meta={key=v.meta; parent=Some u}}
