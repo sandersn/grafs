@@ -44,6 +44,7 @@
     <None Include="Script.fsx" />
     <Compile Include="SpanTest.fs" />
     <Compile Include="MinQueueTest.fs" />
+    <Compile Include="SingleSourceShortestPathTest.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\grafs\grafs.fsproj">

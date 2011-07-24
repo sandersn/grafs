@@ -20,9 +20,7 @@ let sortedEdgePairs g =
       then (w,(src,dst))
       else (w,(dst,src))
     edges |> Seq.map undirected
-  g |> Seq.map (Dictionary.item >> edgePairs) 
-    |> Seq.concat |> set 
-    |> Seq.sortBy fst |> Seq.map snd
+  g |> Seq.collect (Dictionary.item >> edgePairs) |> set |> Seq.sortBy fst |> Seq.map snd
 let minKruskal (g : Graph<'k,unit,int>) =
   let forest = Forest g
   set (seq { 

@@ -31,7 +31,7 @@ type Vertex<'k,'a,'e when 'k : equality> = {
   override this.GetHashCode () = 17 ^^^ hash this.edges
 // graph proper //
 type Graph<'k,'v,'e when 'k : equality> = Dictionary<'k, Vertex<'k,'v,'e>>
-let annotate (g: Graph<'k,'a,unit>) (meta : 'b) : Graph<'k,'b,unit> =
+let annotate (g: Graph<'k,_,'e>) (meta : 'b) : Graph<'k,'b,'e> =
   let g' = Dictionary (Seq.length g)
   for pair in g do
     g'.[pair.Key] <- {meta=meta; edges=pair.Value.edges }
@@ -40,6 +40,8 @@ let vertex v (es : seq<'a>) =
   (v,{meta=(); edges=ResizeArray<Edge<'a,unit>> (es |> Seq.map (fun a -> {edge=a; meta=()}))})
 let wvertex v (es : seq<'a * int>) =
   (v,{meta=(); edges=ResizeArray<Edge<'a,int>> (es |> Seq.map (fun (a,b) -> {edge=a; meta=b}))})
+let edges (g : Graph<'k,_,int>) = 
+  g |> Seq.collect (fun pair -> pair.Value.edges |> Seq.map (fun e -> (e.meta,(pair.Key,e.edge))))
 // metadata //
 type Colour  = White | Grey | Black
 type Bfs<'k> = {
@@ -56,5 +58,9 @@ type Dfs<'k> = {
 }
 type Prim<'k> = {
   key : int
+  parent : option<'k>
+}
+type SingleSource<'k> = {
+  distance : int
   parent : option<'k>
 }

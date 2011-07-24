@@ -45,6 +45,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Compile Include="Span.fs" />
+    <Compile Include="SingleSourceShortestPath.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
