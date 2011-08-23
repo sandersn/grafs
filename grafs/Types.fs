@@ -34,7 +34,7 @@ type Graph<'k,'v,'e when 'k : equality> = Dictionary<'k, Vertex<'k,'v,'e>>
 let annotate (g: Graph<'k,_,'e>) (meta : 'b) : Graph<'k,'b,'e> =
   let g' = Dictionary (Seq.length g)
   for pair in g do
-    g'.[pair.Key] <- {meta=meta; edges=pair.Value.edges }
+    g'.[pair.Key] <- {meta=meta; edges=pair.Value.edges}
   g'
 let vertex v (es : seq<'a>) =
   (v,{meta=(); edges=ResizeArray<Edge<'a,unit>> (es |> Seq.map (fun a -> {edge=a; meta=()}))})
@@ -59,6 +59,11 @@ type Dfs<'k> = {
 type Prim<'k> = {
   key : int
   parent : option<'k>
+}
+type MinPrim<'k> = {
+  vertex : 'k
+  mutable key : int
+  mutable i : int
 }
 type SingleSource<'k> = {
   distance : int

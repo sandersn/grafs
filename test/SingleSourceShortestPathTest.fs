@@ -27,4 +27,41 @@ type public SSSPathTester () =
     Assert.That (g'.['x'].meta, Is.EqualTo {parent=Some 'y'; distance=4})
     Assert.That (g'.['y'].meta, Is.EqualTo {parent=Some 's'; distance=7})
     Assert.That (g'.['z'].meta, Is.EqualTo {parent=Some 't'; distance= -2})
+  [<Test>]
+  member this.DagShortestPathsSetsCorrectParentsAndDistances () =
+    let g = 
+      Dictionary.fromList [
+        wvertex 'r' [('s',5);('t',3)]
+        wvertex 's' [('t',2);('x',6)]
+        wvertex 't' [('x',7);('y',4);('z',2)]
+        wvertex 'x' [('y',-1);('z',1)]
+        wvertex 'y' [('z',-2)]
+        wvertex 'z' []
+      ]
+    let g' = SingleSourceShortestPath.dagShortestPaths g 's'
+    Assert.That (g'.['r'].meta, Is.EqualTo {parent=(None : option<char>);
+                                            distance=System.Int32.MaxValue})
+    Assert.That (g'.['s'].meta, Is.EqualTo {parent=(None : option<char>); distance=0})
+    Assert.That (g'.['t'].meta, Is.EqualTo {parent=Some 's'; distance=2})
+    Assert.That (g'.['x'].meta, Is.EqualTo {parent=Some 's'; distance=6})
+    Assert.That (g'.['y'].meta, Is.EqualTo {parent=Some 'x'; distance=5})
+    Assert.That (g'.['z'].meta, Is.EqualTo {parent=Some 'y'; distance=3})
+  [<Test>]
+  member this.DijkstraSetsCorrectParentsAndDistances () =
+    let g = 
+      Dictionary.fromList [
+        wvertex 's' [('t',10);('y',5)]
+        wvertex 't' [('x',1);('y',2)]
+        wvertex 'x' [('z',4)]
+        wvertex 'y' [('t',3);('x',9);('z',2)]
+        wvertex 'z' [('s',7);('x',6)]
+      ]
+    let g' = SingleSourceShortestPath.dijkstra g 's'
+    // specification of None as option<char> is necessary to appease
+    // the interaction of F#'s strict-ish type system with NUnit's loose-ish typing.
+    Assert.That (g'.['s'].meta, Is.EqualTo {parent=(None : option<char>); distance=0})
+    Assert.That (g'.['t'].meta, Is.EqualTo {parent=Some 'y'; distance=8})
+    Assert.That (g'.['x'].meta, Is.EqualTo {parent=Some 't'; distance=9})
+    Assert.That (g'.['y'].meta, Is.EqualTo {parent=Some 's'; distance=5})
+    Assert.That (g'.['z'].meta, Is.EqualTo {parent=Some 'y'; distance=7})
 

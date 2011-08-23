@@ -27,11 +27,11 @@ let bfs (g : Graph<'k,unit,unit>) (start : 'k) : Graph<'k,Bfs<'k>,unit> =
     loop (queue @ vs)
   loop [start]
 
-let dfsCore (g : Graph<'k,unit,unit>) (orderBy : Graph<'k,Dfs<'k>,unit> -> seq<KeyValuePair<'k,Vertex<'k,_,unit>>>) action : Graph<'k,Dfs<'k>,unit> =
+let dfsCore (g : Graph<'k,unit,'e>) (orderBy : Graph<'k,Dfs<'k>,'e> -> seq<KeyValuePair<'k,Vertex<'k,_,'e>>>) action : Graph<'k,Dfs<'k>,'e> =
   let g' = annotate g {colour=White; discover=0; finish=0; parent=None; cConnected= -1}
   let time = ref 0
   let mutable cConnected = 0
-  let rec dfsLoop (g : Graph<'k,Dfs<'k>,unit>) (root : 'k) k =
+  let rec dfsLoop (g : Graph<'k,Dfs<'k>,'e>) (root : 'k) k =
     let value = g.[root]
     time := !time + 1
     value.meta <- {value.meta with colour=Grey; discover=time.Value; cConnected=k}
@@ -56,10 +56,10 @@ module State =
     action state
     state.Value
 
-let topologicalSort (g : Graph<'k,unit,unit>) =
+let topologicalSort (g : Graph<'k,unit,_>) =
   State.run (fun t -> dfsCore g seq (cons >> update t) |> ignore) []
 
-let stronglyConnectedComponents (g : Graph<'k,unit,unit>) : Set<Set<'k>> =
+let stronglyConnectedComponents (g : Graph<'k,unit,_>) : Set<Set<'k>> =
   let forwardG = dfs g
   dfsCore (reverse g) (Seq.sortBy (fun pair -> -forwardG.[pair.Key].meta.finish)) ignore
   |> Seq.groupBy (fun pair -> pair.Value.meta.cConnected)
