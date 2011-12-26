@@ -46,6 +46,7 @@
     </None>
     <Compile Include="Span.fs" />
     <Compile Include="SingleSourceShortestPath.fs" />
+    <Compile Include="AllPairsShortestPath.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>

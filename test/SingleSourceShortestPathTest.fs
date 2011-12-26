@@ -64,4 +64,19 @@ type public SSSPathTester () =
     Assert.That (g'.['x'].meta, Is.EqualTo {parent=Some 't'; distance=9})
     Assert.That (g'.['y'].meta, Is.EqualTo {parent=Some 's'; distance=5})
     Assert.That (g'.['z'].meta, Is.EqualTo {parent=Some 'y'; distance=7})
-
+  [<Test>]
+  member this.DijkstraSetsCorrectParentsAndDistancesForJohnsonReweightedGraph () =
+    let g = 
+      Dictionary.fromList [
+        wvertex '1' [('2',4);('3',13);('5',0)]
+        wvertex '2' [('4',0);('5',10)]
+        wvertex '3' [('2',0)]
+        wvertex '4' [('1',2);('3',0)]
+        wvertex '5' [('4',2)]
+      ]
+    let g' = SingleSourceShortestPath.dijkstra g '1'
+    Assert.That (g'.['1'].meta, Is.EqualTo {parent=(None : option<char>); distance=0})
+    Assert.That (g'.['2'].meta, Is.EqualTo {parent=Some '3'; distance=2})
+    Assert.That (g'.['3'].meta, Is.EqualTo {parent=Some '4'; distance=2})
+    Assert.That (g'.['4'].meta, Is.EqualTo {parent=Some '5'; distance=2})
+    Assert.That (g'.['5'].meta, Is.EqualTo {parent=Some '1'; distance=0})
